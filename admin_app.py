@@ -15,7 +15,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 # --- CONFIGURACIÓN DE CORREO URGENTE (GMAIL) ---
 CORREO_REMITENTE = "aispuro.bojorquez.chris@gmail.com"          # <--- Pon aquí tu Gmail
 CONTRASENA_APLICACION = "bgng bbxj dfdp rwxn"     # <--- Tu contraseña de aplicación de 16 dígitos
-CORREO_DESTINO = "aispuro.bojorquez.chris@gmail.com"            # <--- Donde quieres recibir la alerta urgente (tu propio correo)
+CORREO_DESTINO = "bojaispuro@gmail.com"            # <--- Donde quieres recibir la alerta urgente (tu propio correo)
 
 def enviar_correo_urgente(asunto, cuerpo):
     """Envía un correo electrónico de alerta urgente vía SMTP de Gmail"""
