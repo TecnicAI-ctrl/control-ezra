@@ -116,4 +116,6 @@ with pestana_misiones:
     f3 = st.file_uploader(f"Foto para: {m3_nombre}", type=["jpg", "png", "jpeg"], key="u3")
     tiene_foto_3 = (f3 is not None)
     if f3:
-        st.image(
+        st.image(f3, caption="Vista previa", width=180)
+
+    c3 = st.checkbox(f"Completado: {m3_nombre}", value=False, disabled
