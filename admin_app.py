@@ -18,15 +18,12 @@ CONTRASENA_APLICACION = "jpma rfff vnkv tilv"
 CORREO_DESTINO = "aispuro.bojorquez.chris@gmail.com"
 
 def enviar_correo_urgente(asunto, cuerpo):
-    """Envía un correo electrónico de alerta urgente vía SMTP de Gmail"""
     try:
         msg = MIMEMultipart()
         msg['From'] = CORREO_REMITENTE
         msg['To'] = CORREO_DESTINO
         msg['Subject'] = asunto
-        
         msg.attach(MIMEText(cuerpo, 'plain'))
-        
         server = smtplib.SMTP('smtp.gmail.com', 587)
         server.starttls()
         server.login(CORREO_REMITENTE, CONTRASENA_APLICACION)
@@ -35,7 +32,6 @@ def enviar_correo_urgente(asunto, cuerpo):
     except Exception as e:
         print(f"Error al enviar correo: {e}")
 
-# Funciones de utilidad para convertir fotos a Base64
 def encode_image(uploaded_file):
     if uploaded_file is not None:
         return base64.b64encode(uploaded_file.getvalue()).decode('utf-8')
@@ -49,14 +45,12 @@ def decode_image(b64_string):
             return None
     return None
 
-# Configuración de la página web
 st.set_page_config(page_title="Control de Misiones PC", page_icon="🎮", layout="centered")
 
 st.title("🎮 Sistema de Misiones")
 fecha_hoy = datetime.now().strftime('%Y-%m-%d')
 st.write(f"**Fecha actual:** {fecha_hoy}")
 
-# Consultar si existe el registro de hoy
 res = supabase.table("pc_control").select("*").eq("fecha", fecha_hoy).execute()
 
 if not res.data:
@@ -71,7 +65,6 @@ if not res.data:
 
 data = res.data[0]
 
-# --- CREACIÓN DE LAS 2 PESTAÑAS (UNA PÚBLICA Y UNA PRIVADA) ---
 pestana_misiones, pestana_admin = st.tabs([
     "🎯 Entrega de Misiones", 
     "🔐 Control Parental y Historial"
@@ -88,7 +81,6 @@ with pestana_misiones:
     m2_nombre = data.get("mision2_nombre") or "📚 Tarea Hecha"
     m3_nombre = data.get("mision3_nombre") or "🛋️ Sala Recogida"
 
-    # --- MISIÓN 1 ---
     f1 = st.file_uploader(f"Foto para: {m1_nombre}", type=["jpg", "png", "jpeg"], key="u1")
     tiene_foto_1 = (f1 is not None)
     if f1:
@@ -100,7 +92,6 @@ with pestana_misiones:
 
     st.markdown("---")
 
-    # --- MISIÓN 2 ---
     f2 = st.file_uploader(f"Foto para: {m2_nombre}", type=["jpg", "png", "jpeg"], key="u2")
     tiene_foto_2 = (f2 is not None)
     if f2:
@@ -112,7 +103,6 @@ with pestana_misiones:
 
     st.markdown("---")
 
-    # --- MISIÓN 3 ---
     f3 = st.file_uploader(f"Foto para: {m3_nombre}", type=["jpg", "png", "jpeg"], key="u3")
     tiene_foto_3 = (f3 is not None)
     if f3:
@@ -124,7 +114,6 @@ with pestana_misiones:
 
     st.markdown("---")
 
-    # Nota en blanco obligatoria
     nota_enviada = st.text_area("📝 Escribe una nota u observaciones del día (Obligatorio):", value="", placeholder="Ej. Me porté bien, terminé mis deberes...")
 
     if st.button("📤 Enviar Evidencias", type="primary", use_container_width=True):
@@ -145,7 +134,6 @@ with pestana_misiones:
 
             supabase.table("pc_control").update(update_dict).eq("fecha", fecha_hoy).execute()
             
-            # 🚀 ENVIAR CORREO URGENTE A GMAIL
             link_sistema = "https://control-ezra-r45z6xjjqbekjhk4pwfrw7.streamlit.app/"
             asunto_correo = f"🚨 [URGENTE] Misiones Parentales Completadas - {fecha_hoy}"
             cuerpo_correo = f"""¡Hola, Papá! Se han enviado nuevas evidencias de misiones para revisión.
@@ -174,14 +162,13 @@ Entra inmediatamente al sistema para revisar las fotografías y autorizar el tie
 with pestana_admin:
     st.subheader("🔐 Panel de Administración y Seguridad")
     password_ingresada = st.text_input("Contraseña de Administración:", type="password", key="pass_admin")
-    es_admin = (password_ingresada == "1234") # <--- CAMBIA "1234" POR TU CLAVE
+    es_admin = (password_ingresada == "1234")
 
     if not es_admin:
         st.warning("⚠️ Introduce tu contraseña de administrador para desbloquear los controles, misiones y el historial privado.")
     else:
         st.success("✅ Acceso de Administrador Autorizado")
         
-        # --- SECCIÓN: PERSONALIZAR MISIONES DEL DÍA ---
         st.markdown("---")
         st.write("### ⚙️ Personalizar Misiones para Hoy")
         st.caption("Cambia el nombre de las tareas de hoy si deseas asignarle actividades diferentes:")
@@ -199,7 +186,6 @@ with pestana_admin:
             st.success("¡Misiones del día actualizadas correctamente!")
             st.rerun()
 
-        # --- SECCIÓN: REVISIÓN DE EVIDENCIAS Y AUTORIZACIÓN ---
         st.markdown("---")
         st.write("### 👁️ Evidencias Recibidas de Hoy")
         
@@ -231,7 +217,6 @@ with pestana_admin:
             else:
                 st.caption("Sin foto")
 
-        # Asignar tiempo
         es_fin_de_semana = datetime.now().weekday() in [4, 5, 6]
         horas_asignar = 5 if es_fin_de_semana else 3
         segundos_totales = horas_asignar * 3600
@@ -258,7 +243,6 @@ with pestana_admin:
                 st.error("🚨 ¡PC Bloqueada!")
                 st.rerun()
 
-        # --- SECCIÓN: HISTORIAL PRIVADO DE REGISTROS ---
         st.markdown("---")
         st.subheader("📜 Historial Privado de Registros Pasados")
         st.write("Consulta el registro histórico acumulado (Área protegida):")
@@ -282,4 +266,22 @@ with pestana_admin:
                 st.write("#### 📸 Evidencias fotográficas del día:")
                 h_col1, h_col2, h_col3 = st.columns(3)
                 
-                h_img1 = decode_image(hist_data.get
+                h_img1 = decode_image(hist_data.get("img1_data"))
+                h_img2 = decode_image(hist_data.get("img2_data"))
+                h_img3 = decode_image(hist_data.get("img3_data"))
+
+                with h_col1:
+                    if h_img1:
+                        st.image(h_img1, caption="Misión 1", use_container_width=True)
+                    else:
+                        st.caption("Sin foto")
+                with h_col2:
+                    if h_img2:
+                        st.image(h_img2, caption="Misión 2", use_container_width=True)
+                    else:
+                        st.caption("Sin foto")
+                with h_col3:
+                    if h_img3:
+                        st.image(h_img3, caption="Misión 3", use_container_width=True)
+                    else:
+                        st.caption("Sin foto")
