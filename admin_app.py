@@ -118,4 +118,20 @@ with pestana_misiones:
     if f3:
         st.image(f3, caption="Vista previa", width=180)
 
-    c3 = st.checkbox(f"Completado: {m3_nombre}", value=False, disabled
+    c3 = st.checkbox(f"Completado: {m3_nombre}", value=False, disabled=not tiene_foto_3)
+    if not tiene_foto_3:
+        st.caption("🔒 Sube una foto arriba para habilitar esta casilla.")
+
+    st.markdown("---")
+
+    # Nota en blanco obligatoria
+    nota_enviada = st.text_area("📝 Escribe una nota u observaciones del día (Obligatorio):", value="", placeholder="Ej. Me porté bien, terminé mis deberes...")
+
+    if st.button("📤 Enviar Evidencias", type="primary", use_container_width=True):
+        if not nota_enviada.strip():
+            st.error("⚠️ El campo de notas no puede estar vacío. Debes escribir un comentario o resumen para poder enviar.")
+        elif not (f1 and f2 and f3):
+            st.error("⚠️ Debes subir las fotografías de todas las misiones para poder enviarlas.")
+        else:
+            update_dict = {
+                "cuarto_limpio":
