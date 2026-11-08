@@ -71,11 +71,10 @@ if not res.data:
 
 data = res.data[0]
 
-# --- PESTAÑAS DEL SISTEMA ---
-pestana_misiones, pestana_admin, pestana_historial = st.tabs([
+# --- CREACIÓN DE LAS 2 PESTAÑAS (UNA PÚBLICA Y UNA PRIVADA) ---
+pestana_misiones, pestana_admin = st.tabs([
     "🎯 Entrega de Misiones", 
-    "🔐 Control Parental", 
-    "📜 Historial de Registros"
+    "🔐 Control Parental y Historial"
 ])
 
 # ==========================================
@@ -91,9 +90,7 @@ with pestana_misiones:
 
     # --- MISIÓN 1 ---
     f1 = st.file_uploader(f"Foto para: {m1_nombre}", type=["jpg", "png", "jpeg"], key="u1")
-    # Al abrir la página fresca, f1 es None y no precargamos img1_data aquí para mantenerlo en blanco
     tiene_foto_1 = (f1 is not None)
-    
     if f1:
         st.image(f1, caption="Vista previa", width=180)
 
@@ -106,7 +103,6 @@ with pestana_misiones:
     # --- MISIÓN 2 ---
     f2 = st.file_uploader(f"Foto para: {m2_nombre}", type=["jpg", "png", "jpeg"], key="u2")
     tiene_foto_2 = (f2 is not None)
-    
     if f2:
         st.image(f2, caption="Vista previa", width=180)
 
@@ -119,7 +115,6 @@ with pestana_misiones:
     # --- MISIÓN 3 ---
     f3 = st.file_uploader(f"Foto para: {m3_nombre}", type=["jpg", "png", "jpeg"], key="u3")
     tiene_foto_3 = (f3 is not None)
-    
     if f3:
         st.image(f3, caption="Vista previa", width=180)
 
@@ -143,91 +138,3 @@ with pestana_misiones:
                 "tarea_hecha": c2,
                 "sala_recogida": c3,
                 "nota_conducta": nota_enviada,
-                "img1_data": encode_image(f1),
-                "img2_data": encode_image(f2),
-                "img3_data": encode_image(f3)
-            }
-
-            supabase.table("pc_control").update(update_dict).eq("fecha", fecha_hoy).execute()
-            
-            # 🚀 ENVIAR CORREO URGENTE A GMAIL
-            link_sistema = "https://control-ezra-r45z6xjjqbekjhk4pwfrw7.streamlit.app/"
-            asunto_correo = f"🚨 [URGENTE] Misiones Parentales Completadas - {fecha_hoy}"
-            cuerpo_correo = f"""¡Hola, Papá! Se han enviado nuevas evidencias de misiones para revisión.
-
-Fecha: {fecha_hoy}
-
-Estado de las misiones:
-- {m1_nombre}: {'✅ Completada' if c1 else '❌ Pendiente'}
-- {m2_nombre}: {'✅ Completada' if c2 else '❌ Pendiente'}
-- {m3_nombre}: {'✅ Completada' if c3 else '❌ Pendiente'}
-
-Nota del día:
-"{nota_enviada}"
-
-Entra inmediatamente al sistema para revisar las fotografías y autorizar el tiempo de juego:
-{link_sistema}
-"""
-            enviar_correo_urgente(asunto_correo, cuerpo_correo)
-
-            st.success("¡Evidencias enviadas con éxito y notificación urgente enviada a tu correo!")
-            st.rerun()
-
-# ==========================================
-# PESTAÑA 2: CONTROL PARENTAL (EXCLUSIVO PAPÁ)
-# ==========================================
-with pestana_admin:
-    st.subheader("🔐 Panel de Administración")
-    password_ingresada = st.text_input("Contraseña de Administración:", type="password", key="pass_admin")
-    es_admin = (password_ingresada == "1234") # <--- CAMBIA "1234" POR TU CLAVE
-
-    if not es_admin:
-        st.warning("⚠️ Introduce tu contraseña para personalizar misiones o autorizar tiempo.")
-    else:
-        st.success("✅ Acceso Autorizado")
-        
-        # --- SECCIÓN: PERSONALIZAR MISIONES DEL DÍA ---
-        st.markdown("---")
-        st.write("### ⚙️ Personalizar Misiones para Hoy")
-        st.caption("Cambia el nombre de las tareas de hoy si deseas asignarle actividades diferentes:")
-        
-        n_m1 = st.text_input("Misión 1:", value=m1_nombre)
-        n_m2 = st.text_input("Misión 2:", value=m2_nombre)
-        n_m3 = st.text_input("Misión 3:", value=m3_nombre)
-
-        if st.button("💾 Guardar Nuevas Misiones del Día"):
-            supabase.table("pc_control").update({
-                "mision1_nombre": n_m1,
-                "mision2_nombre": n_m2,
-                "mision3_nombre": n_m3
-            }).eq("fecha", fecha_hoy).execute()
-            st.success("¡Misiones del día actualizadas correctamente!")
-            st.rerun()
-
-        # --- SECCIÓN: REVISIÓN DE EVIDENCIAS Y AUTORIZACIÓN ---
-        st.markdown("---")
-        st.write("### 👁️ Evidencias Recibidas del Día")
-        
-        st.write(f"- **{m1_nombre}:** {'Sí 🟢' if data.get('cuarto_limpio') else 'No 🔴'}")
-        st.write(f"- **{m2_nombre}:** {'Sí 🟢' if data.get('tarea_hecha') else 'No 🔴'}")
-        st.write(f"- **{m3_nombre}:** {'Sí 🟢' if data.get('sala_recogida') else 'No 🔴'}")
-        st.info(f"**Nota recibida:** {data.get('nota_conducta', 'Sin nota')}")
-
-        st.write("#### 📸 Fotografías Guardadas:")
-        col_img1, col_img2, col_img3 = st.columns(3)
-        
-        img1_b64 = decode_image(data.get("img1_data"))
-        img2_b64 = decode_image(data.get("img2_data"))
-        img3_b64 = decode_image(data.get("img3_data"))
-
-        with col_img1:
-            if img1_b64:
-                st.image(img1_b64, caption=m1_nombre, use_container_width=True)
-            else:
-                st.caption("Sin foto")
-
-        with col_img2:
-            if img2_b64:
-                st.image(img2_b64, caption=m2_nombre, use_container_width=True)
-            else:
-                st.caption("Sin foto")
