@@ -84,22 +84,27 @@ with pestana_misiones:
     elif data.get("img3_data"):
         st.image(decode_image(data.get("img3_data")), caption="Foto guardada", width=180)
 
-    nota_enviada = st.text_area("📝 Nota de comportamiento o comentarios del día:", value=data.get("nota_conducta", ""))
+    # Nota en blanco por defecto (usando "" en lugar de datos guardados previos para forzar escritura nueva o validación)
+    nota_enviada = st.text_area("📝 Escribe una nota u observaciones del día (Obligatorio):", value="", placeholder="Ej. Me porté bien, terminé mis deberes...")
 
     if st.button("📤 Enviar Evidencias", type="primary", use_container_width=True):
-        update_dict = {
-            "cuarto_limpio": c1,
-            "tarea_hecha": c2,
-            "sala_recogida": c3,
-            "nota_conducta": nota_enviada
-        }
-        if f1: update_dict["img1_data"] = encode_image(f1)
-        if f2: update_dict["img2_data"] = encode_image(f2)
-        if f3: update_dict["img3_data"] = encode_image(f3)
+        # Validar que el cuadro de texto no esté vacío
+        if not nota_enviada.strip():
+            st.error("⚠️ El campo de notas no puede estar vacío. Debes escribir un comentario o resumen para poder enviar.")
+        else:
+            update_dict = {
+                "cuarto_limpio": c1,
+                "tarea_hecha": c2,
+                "sala_recogida": c3,
+                "nota_conducta": nota_enviada
+            }
+            if f1: update_dict["img1_data"] = encode_image(f1)
+            if f2: update_dict["img2_data"] = encode_image(f2)
+            if f3: update_dict["img3_data"] = encode_image(f3)
 
-        supabase.table("pc_control").update(update_dict).eq("fecha", fecha_hoy).execute()
-        st.success("¡Evidencias enviadas y guardadas correctamente!")
-        st.rerun()
+            supabase.table("pc_control").update(update_dict).eq("fecha", fecha_hoy).execute()
+            st.success("¡Evidencias enviadas y guardadas correctamente!")
+            st.rerun()
 
 # ==========================================
 # PESTAÑA 2: CONTROL PARENTAL (EXCLUSIVO PAPÁ)
@@ -230,5 +235,5 @@ with pestana_historial:
                 if h_img2: st.image(h_img2, caption="Misión 2", use_container_width=True)
                 else: st.caption("Sin foto")
             with h_col3:
-                if h_img3: st.image(h_img3, caption="Misión 3", use_container_width=True)
+                if h_img3: st.image(h_img3, caption="Mision 3", use_container_width=True)
                 else: st.caption("Sin foto")
