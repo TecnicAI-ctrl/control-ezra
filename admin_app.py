@@ -4,8 +4,8 @@ from datetime import datetime
 
 # --- CONFIGURACIÓN DE CREDENCIALES DE SUPABASE ---
 # Reemplaza esto con los datos de tu proyecto en Supabase (Project Settings -> API)
-SUPABASE_URL = "https://tu-proyecto.supabase.co"
-SUPABASE_KEY = "tu-api-anon-key-larga-aqui"
+SUPABASE_URL = "https://drhoxkbmqwdgrnnuuhlq.supabase.co"
+SUPABASE_KEY = "sb_publishable_n1yL2gCd5B6OjPZDf_6wGA_dG1iLcN7"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
