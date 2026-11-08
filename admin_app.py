@@ -216,4 +216,70 @@ with pestana_admin:
         img3_b64 = decode_image(data.get("img3_data"))
 
         with col_img1:
-            if img1_b64: st.image(img1_b64, caption=m1_nombre, use_container
+            if img1_b64:
+                st.image(img1_b64, caption=m1_nombre, use_container_width=True)
+            else:
+                st.caption("Sin foto")
+        with col_img2:
+            if img2_b64:
+                st.image(img2_b64, caption=m2_nombre, use_container_width=True)
+            else:
+                st.caption("Sin foto")
+        with col_img3:
+            if img3_b64:
+                st.image(img3_b64, caption=m3_nombre, use_container_width=True)
+            else:
+                st.caption("Sin foto")
+
+        # Asignar tiempo
+        es_fin_de_semana = datetime.now().weekday() in [4, 5, 6]
+        horas_asignar = 5 if es_fin_de_semana else 3
+        segundos_totales = horas_asignar * 3600
+
+        st.markdown("---")
+        col1, col2 = st.columns(2)
+
+        with col1:
+            if st.button("🚀 Aprobar y Otorgar Tiempo", type="primary", use_container_width=True):
+                supabase.table("pc_control").update({
+                    "misiones_completadas": True,
+                    "tiempo_restante_segundos": segundos_totales,
+                    "bloqueado_manualmente": False
+                }).eq("fecha", fecha_hoy).execute()
+                st.success(f"¡Tiempo otorgado! Se liberaron {horas_asignar} horas.")
+                st.rerun()
+
+        with col2:
+            if st.button("🔒 Bloquear PC Inmediatamente", type="secondary", use_container_width=True):
+                supabase.table("pc_control").update({
+                    "bloqueado_manualmente": True,
+                    "misiones_completadas": False
+                }).eq("fecha", fecha_hoy).execute()
+                st.error("🚨 ¡PC Bloqueada!")
+                st.rerun()
+
+        # --- SECCIÓN: HISTORIAL PRIVADO DE REGISTROS ---
+        st.markdown("---")
+        st.subheader("📜 Historial Privado de Registros Pasados")
+        st.write("Consulta el registro histórico acumulado (Área protegida):")
+
+        all_records = supabase.table("pc_control").select("*").order("fecha", desc=True).execute()
+        
+        if all_records.data:
+            fechas_disponibles = [r["fecha"] for r in all_records.data]
+            fecha_seleccionada = st.selectbox("Selecciona una fecha a consultar:", fechas_disponibles, key="sel_historial")
+            
+            hist_data = next((r for r in all_records.data if r["fecha"] == fecha_seleccionada), None)
+            
+            if hist_data:
+                st.markdown(f"#### 📅 Registro del {hist_data['fecha']}")
+                st.write(f"- **Misión 1 ({hist_data.get('mision1_nombre', 'Misión 1')}):** {'Cumplida 🟢' if hist_data.get('cuarto_limpio') else 'No realizada 🔴'}")
+                st.write(f"- **Misión 2 ({hist_data.get('mision2_nombre', 'Misión 2')}):** {'Cumplida 🟢' if hist_data.get('tarea_hecha') else 'No realizada 🔴'}")
+                st.write(f"- **Misión 3 ({hist_data.get('mision3_nombre', 'Misión 3')}):** {'Cumplida 🟢' if hist_data.get('sala_recogida') else 'No realizada 🔴'}")
+                st.write(f"- **Tiempo Otorgado:** {'Sí 🎮' if hist_data.get('misiones_completadas') else 'No / Bloqueado 🔒'}")
+                st.info(f"**Nota del día:** {hist_data.get('nota_conducta', 'Sin registro')}")
+
+                st.write("#### 📸 Evidencias fotográficas del día:")
+                h_col1, h_col2, h_col3 = st.columns(3)
+                
+                h_img1 = decode_image(hist_data.get
