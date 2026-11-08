@@ -13,7 +13,7 @@ SUPABASE_KEY = "sb_publishable_n1yL2gCd5B6OjPZDf_6wGA_dG1iLcN7"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- CONFIGURACIÓN DE CORREO URGENTE (GMAIL) ---
-CORREO_REMITENTE = "bojaispuro@gmail.com"          # <--- Pon aquí tu Gmail
+CORREO_REMITENTE = "aispuro.bojorquez.chris@gmail.com"          # <--- Pon aquí tu Gmail
 CONTRASENA_APLICACION = "bgng bbxj dfdp rwxn"     # <--- Tu contraseña de aplicación de 16 dígitos
 CORREO_DESTINO = "aispuro.bojorquez.chris@gmail.com"            # <--- Donde quieres recibir la alerta urgente (tu propio correo)
 
