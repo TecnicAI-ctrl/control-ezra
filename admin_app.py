@@ -1,6 +1,8 @@
 import streamlit as st
 import base64
-import urllib.parse
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from supabase import create_client
 from datetime import datetime
 
@@ -10,8 +12,28 @@ SUPABASE_KEY = "sb_publishable_n1yL2gCd5B6OjPZDf_6wGA_dG1iLcN7"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Tu número de WhatsApp personal para recibir la alerta directa
-WHATSAPP_DESTINO = "+16193955742"
+# --- CONFIGURACIÓN DE CORREO URGENTE (GMAIL) ---
+CORREO_REMITENTE = "Ezraispuro15@gmail.com"          # <--- Pon aquí tu Gmail
+CONTRASENA_APLICACION = "bgng bbxj dfdp rwxn"     # <--- Tu contraseña de aplicación de 16 dígitos
+CORREO_DESTINO = "aispuro.bojorquez.chris@gmail.com"            # <--- Donde quieres recibir la alerta urgente (tu propio correo)
+
+def enviar_correo_urgente(asunto, cuerpo):
+    """Envía un correo electrónico de alerta urgente vía SMTP de Gmail"""
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = CORREO_REMITENTE
+        msg['To'] = CORREO_DESTINO
+        msg['Subject'] = asunto
+        
+        msg.attach(MIMEText(cuerpo, 'plain'))
+        
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(CORREO_REMITENTE, CONTRASENA_APLICACION)
+        server.sendmail(CORREO_REMITENTE, CORREO_DESTINO, msg.as_string())
+        server.quit()
+    except Exception as e:
+        print(f"Error al enviar correo: {e}")
 
 # Funciones de utilidad para convertir fotos a Base64
 def encode_image(uploaded_file):
@@ -131,18 +153,28 @@ with pestana_misiones:
 
             supabase.table("pc_control").update(update_dict).eq("fecha", fecha_hoy).execute()
             
-            st.success("¡Evidencias guardadas con éxito en el sistema!")
-            
-            # Generar enlace directo de WhatsApp con el mensaje pre-llenado y link de la app
-            link_sistema = "https://control-ezra.streamlit.app" # Reemplaza con tu enlace si cambia
-            texto_alerta = f"🚨 *Misiones Parentales Completadas* 🚨\n📅 Fecha: {fecha_hoy}\n\n- {m1_nombre}: {'✅' if c1 else '❌'}\n- {m2_nombre}: {'✅' if c2 else '❌'}\n- {m3_nombre}: {'✅' if c3 else '❌'}\n\n📝 *Nota:* {nota_enviada}\n\n🔗 Entra aquí para revisar y aprobar: {link_sistema}"
-            
-            url_whatsapp = f"https://wa.me/{WHATSAPP_DESTINO}?text={urllib.parse.quote(texto_alerta)}"
-            
-            st.markdown("---")
-            st.markdown("### 📲 ¡Paso final para avisar a Papá!")
-            st.markdown("Toca el siguiente botón para enviar la notificación directo a su WhatsApp:")
-            st.link_button("📲 Enviar Notificación por WhatsApp", url_whatsapp, use_container_width=True)
+            # 🚀 ENVIAR CORREO URGENTE A GMAIL
+            link_sistema = "https://control-ezra.streamlit.app"
+            asunto_correo = f"🚨 [URGENTE] Misiones Parentales Completadas - {fecha_hoy}"
+            cuerpo_correo = f"""¡Hola, Papá! Se han enviado nuevas evidencias de misiones para revisión.
+
+Fecha: {fecha_hoy}
+
+Estado de las misiones:
+- {m1_nombre}: {'✅ Completada' if c1 else '❌ Pendiente'}
+- {m2_nombre}: {'✅ Completada' if c2 else '❌ Pendiente'}
+- {m3_nombre}: {'✅ Completada' if c3 else '❌ Pendiente'}
+
+Nota del día:
+"{nota_enviada}"
+
+Entra inmediatamente al sistema para revisar las fotografías y autorizar el tiempo de juego:
+{link_sistema}
+"""
+            enviar_correo_urgente(asunto_correo, cuerpo_correo)
+
+            st.success("¡Evidencias enviadas con éxito y notificación urgente enviada a tu correo!")
+            st.rerun()
 
 # ==========================================
 # PESTAÑA 2: CONTROL PARENTAL (EXCLUSIVO PAPÁ)
