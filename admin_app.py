@@ -57,45 +57,69 @@ pestana_misiones, pestana_admin, pestana_historial = st.tabs([
 # ==========================================
 with pestana_misiones:
     st.subheader("📋 Misiones asignadas para hoy")
-    st.write("Completa tus responsabilidades y sube la foto de cada una:")
+    st.write("Sube la foto de cada misión para poder marcarla como completada:")
 
     m1_nombre = data.get("mision1_nombre") or "🧹 Cuarto Limpio"
     m2_nombre = data.get("mision2_nombre") or "📚 Tarea Hecha"
     m3_nombre = data.get("mision3_nombre") or "🛋️ Sala Recogida"
 
-    c1 = st.checkbox(m1_nombre, value=data.get("cuarto_limpio", False))
+    # --- MISIÓN 1 ---
     f1 = st.file_uploader(f"Foto para: {m1_nombre}", type=["jpg", "png", "jpeg"], key="u1")
+    # Verificamos si hay archivo nuevo subido O si ya hay una foto guardada en base de datos
+    tiene_foto_1 = (f1 is not None) or bool(data.get("img1_data"))
+    
     if f1:
         st.image(f1, caption="Vista previa", width=180)
     elif data.get("img1_data"):
         st.image(decode_image(data.get("img1_data")), caption="Foto guardada", width=180)
 
-    c2 = st.checkbox(m2_nombre, value=data.get("tarea_hecha", False))
+    c1 = st.checkbox(f"Completado: {m1_nombre}", value=data.get("cuarto_limpio", False) and tiene_foto_1, disabled=not tiene_foto_1)
+    if not tiene_foto_1:
+        st.caption("🔒 Sube una foto arriba para habilitar esta casilla.")
+
+    st.markdown("---")
+
+    # --- MISIÓN 2 ---
     f2 = st.file_uploader(f"Foto para: {m2_nombre}", type=["jpg", "png", "jpeg"], key="u2")
+    tiene_foto_2 = (f2 is not None) or bool(data.get("img2_data"))
+    
     if f2:
         st.image(f2, caption="Vista previa", width=180)
     elif data.get("img2_data"):
         st.image(decode_image(data.get("img2_data")), caption="Foto guardada", width=180)
 
-    c3 = st.checkbox(m3_nombre, value=data.get("sala_recogida", False))
+    c2 = st.checkbox(f"Completado: {m2_nombre}", value=data.get("tarea_hecha", False) and tiene_foto_2, disabled=not tiene_foto_2)
+    if not tiene_foto_2:
+        st.caption("🔒 Sube una foto arriba para habilitar esta casilla.")
+
+    st.markdown("---")
+
+    # --- MISIÓN 3 ---
     f3 = st.file_uploader(f"Foto para: {m3_nombre}", type=["jpg", "png", "jpeg"], key="u3")
+    tiene_foto_3 = (f3 is not None) or bool(data.get("img3_data"))
+    
     if f3:
         st.image(f3, caption="Vista previa", width=180)
     elif data.get("img3_data"):
         st.image(decode_image(data.get("img3_data")), caption="Foto guardada", width=180)
 
-    # Nota en blanco por defecto (usando "" en lugar de datos guardados previos para forzar escritura nueva o validación)
+    c3 = st.checkbox(f"Completado: {m3_nombre}", value=data.get("sala_recogida", False) and tiene_foto_3, disabled=not tiene_foto_3)
+    if not tiene_foto_3:
+        st.caption("🔒 Sube una foto arriba para habilitar esta casilla.")
+
+    st.markdown("---")
+
+    # Nota obligatoria
     nota_enviada = st.text_area("📝 Escribe una nota u observaciones del día (Obligatorio):", value="", placeholder="Ej. Me porté bien, terminé mis deberes...")
 
     if st.button("📤 Enviar Evidencias", type="primary", use_container_width=True):
-        # Validar que el cuadro de texto no esté vacío
         if not nota_enviada.strip():
             st.error("⚠️ El campo de notas no puede estar vacío. Debes escribir un comentario o resumen para poder enviar.")
         else:
             update_dict = {
-                "cuarto_limpio": c1,
-                "tarea_hecha": c2,
-                "sala_recogida": c3,
+                "cuarto_limpio": c1 if tiene_foto_1 else False,
+                "tarea_hecha": c2 if tiene_foto_2 else False,
+                "sala_recogida": c3 if tiene_foto_3 else False,
                 "nota_conducta": nota_enviada
             }
             if f1: update_dict["img1_data"] = encode_image(f1)
