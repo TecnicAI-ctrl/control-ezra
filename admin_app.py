@@ -13,9 +13,9 @@ SUPABASE_KEY = "sb_publishable_n1yL2gCd5B6OjPZDf_6wGA_dG1iLcN7"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- CONFIGURACIÓN DE CORREO URGENTE (GMAIL) ---
-CORREO_REMITENTE = "aispuro.bojorquez.chris@gmail.com"          # <--- Pon aquí tu Gmail
-CONTRASENA_APLICACION = "bgng bbxj dfdp rwxn"     # <--- Tu contraseña de aplicación de 16 dígitos
-CORREO_DESTINO = "bojaispuro@gmail.com"            # <--- Donde quieres recibir la alerta urgente (tu propio correo)
+CORREO_REMITENTE = "tu_correo@gmail.com"          # <--- Pon aquí tu Gmail
+CONTRASENA_APLICACION = "xxxx xxxx xxxx xxxx"     # <--- Tu contraseña de aplicación de 16 dígitos
+CORREO_DESTINO = "tu_correo@gmail.com"            # <--- Tu correo para recibir la alerta
 
 def enviar_correo_urgente(asunto, cuerpo):
     """Envía un correo electrónico de alerta urgente vía SMTP de Gmail"""
@@ -153,8 +153,8 @@ with pestana_misiones:
 
             supabase.table("pc_control").update(update_dict).eq("fecha", fecha_hoy).execute()
             
-            # 🚀 ENVIAR CORREO URGENTE A GMAIL
-            link_sistema = "https://control-ezra.streamlit.app"
+            # 🚀 ENVIAR CORREO URGENTE A GMAIL CON EL LINK CORRECTO
+            link_sistema = "https://control-ezra-r45z6xjjqbekjhk4pwfrw7.streamlit.app/"
             asunto_correo = f"🚨 [URGENTE] Misiones Parentales Completadas - {fecha_hoy}"
             cuerpo_correo = f"""¡Hola, Papá! Se han enviado nuevas evidencias de misiones para revisión.
 
