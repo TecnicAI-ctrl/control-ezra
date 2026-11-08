@@ -1,5 +1,6 @@
 import streamlit as st
 import base64
+import urllib.parse
 from supabase import create_client
 from datetime import datetime
 
@@ -9,7 +10,10 @@ SUPABASE_KEY = "sb_publishable_n1yL2gCd5B6OjPZDf_6wGA_dG1iLcN7"
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Funciones de utilidad para convertir fotos a Base64 y guardarlas permanentemente
+# Tu número de WhatsApp personal para recibir la alerta directa
+WHATSAPP_DESTINO = "+16193955742"
+
+# Funciones de utilidad para convertir fotos a Base64
 def encode_image(uploaded_file):
     if uploaded_file is not None:
         return base64.b64encode(uploaded_file.getvalue()).decode('utf-8')
@@ -65,7 +69,6 @@ with pestana_misiones:
 
     # --- MISIÓN 1 ---
     f1 = st.file_uploader(f"Foto para: {m1_nombre}", type=["jpg", "png", "jpeg"], key="u1")
-    # Verificamos si hay archivo nuevo subido O si ya hay una foto guardada en base de datos
     tiene_foto_1 = (f1 is not None) or bool(data.get("img1_data"))
     
     if f1:
@@ -127,8 +130,19 @@ with pestana_misiones:
             if f3: update_dict["img3_data"] = encode_image(f3)
 
             supabase.table("pc_control").update(update_dict).eq("fecha", fecha_hoy).execute()
-            st.success("¡Evidencias enviadas y guardadas correctamente!")
-            st.rerun()
+            
+            st.success("¡Evidencias guardadas con éxito en el sistema!")
+            
+            # Generar enlace directo de WhatsApp con el mensaje pre-llenado y link de la app
+            link_sistema = "https://control-ezra.streamlit.app" # Reemplaza con tu enlace si cambia
+            texto_alerta = f"🚨 *Misiones Parentales Completadas* 🚨\n📅 Fecha: {fecha_hoy}\n\n- {m1_nombre}: {'✅' if c1 else '❌'}\n- {m2_nombre}: {'✅' if c2 else '❌'}\n- {m3_nombre}: {'✅' if c3 else '❌'}\n\n📝 *Nota:* {nota_enviada}\n\n🔗 Entra aquí para revisar y aprobar: {link_sistema}"
+            
+            url_whatsapp = f"https://wa.me/{WHATSAPP_DESTINO}?text={urllib.parse.quote(texto_alerta)}"
+            
+            st.markdown("---")
+            st.markdown("### 📲 ¡Paso final para avisar a Papá!")
+            st.markdown("Toca el siguiente botón para enviar la notificación directo a su WhatsApp:")
+            st.link_button("📲 Enviar Notificación por WhatsApp", url_whatsapp, use_container_width=True)
 
 # ==========================================
 # PESTAÑA 2: CONTROL PARENTAL (EXCLUSIVO PAPÁ)
@@ -256,7 +270,7 @@ with pestana_historial:
                 if h_img1: st.image(h_img1, caption="Misión 1", use_container_width=True)
                 else: st.caption("Sin foto")
             with h_col2:
-                if h_img2: st.image(h_img2, caption="Misión 2", use_container_width=True)
+                if h_img2: st.image(h_img2, caption="Mision 2", use_container_width=True)
                 else: st.caption("Sin foto")
             with h_col3:
                 if h_img3: st.image(h_img3, caption="Mision 3", use_container_width=True)
