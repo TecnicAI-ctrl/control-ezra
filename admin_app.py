@@ -162,7 +162,7 @@ Entra inmediatamente al sistema para revisar las fotografías y autorizar el tie
 with pestana_admin:
     st.subheader("🔐 Panel de Administración y Seguridad")
     password_ingresada = st.text_input("Contraseña de Administración:", type="password", key="pass_admin")
-    es_admin = (password_ingresada == "1234")
+    es_admin = (password_ingresada == "0310")
 
     if not es_admin:
         st.warning("⚠️ Introduce tu contraseña de administrador para desbloquear los controles, misiones y el historial privado.")
